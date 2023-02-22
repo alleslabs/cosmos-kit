@@ -7,12 +7,14 @@ import { GasPrice } from "@cosmjs/stargate";
 import { wallets as cosmostationWallets } from "@cosmos-kit/cosmostation";
 import { wallets as keplrWallets } from "@cosmos-kit/keplr";
 import { wallets as leapWallets } from "@cosmos-kit/leap";
+import { wallets as terraWallets } from "@cosmos-kit/terra-extension";
 import { wallets as xdefiWallets } from "@cosmos-kit/xdefi-extension";
 import { wallets as omniWallets } from "@cosmos-kit/omni";
 import { wallets as trustWallets } from "@cosmos-kit/trust";
 import { ChainProvider, defaultTheme } from "@cosmos-kit/react";
 import { wallets as vectisWallets } from "@cosmos-kit/vectis";
 import { assets, chains } from "chain-registry";
+import { terra2testnet, terra2testnetAssets } from "../config/terra2testnet";
 import type { AppProps } from "next/app";
 import { WalletViewProps } from "@cosmos-kit/core";
 
@@ -35,8 +37,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         // assetLists={assets.filter(
         //   (assets) => assets.chain_name !== "cosmoshub"
         // )}
-        chains={chains}
-        assetLists={assets}
+        chains={[...chains, terra2testnet]}
+        assetLists={[...assets, terra2testnetAssets]}
         wallets={[
           ...keplrWallets,
           // ...cosmostationWallets,
@@ -45,6 +47,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           // ...xdefiWallets,
           // ...omniWallets,
           // ...trustWallets,
+          ...terraWallets,
         ]}
         defaultNameService={"stargaze"}
         walletConnectOptions={{

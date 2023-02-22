@@ -7,19 +7,11 @@ import { useChain } from "@cosmos-kit/react";
 import BigNumber from "bignumber.js";
 import { assets } from "chain-registry";
 import { cosmos } from "juno-network";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { ChainsTXWalletSection, SendTokensCard } from "../components";
 
-const chainName = "cosmoshub";
-
-const chainassets: AssetList = assets.find(
-  (chain) => chain.chain_name === chainName
-) as AssetList;
-
-const coin: Asset = chainassets.assets.find(
-  (asset) => asset.base === "uatom"
-) as Asset;
+const chainName = "terra2testnet";
 
 const sendTokens = (
   getSigningStargateClient: () => Promise<SigningStargateClient>,
@@ -38,7 +30,7 @@ const sendTokens = (
     const msg = send({
       amount: [
         {
-          denom: coin.base,
+          denom: "uluna",
           amount: "1000",
         },
       ],
@@ -49,11 +41,11 @@ const sendTokens = (
     const fee: StdFee = {
       amount: [
         {
-          denom: coin.base,
-          amount: "2000",
+          denom: "uluna",
+          amount: "16536",
         },
       ],
-      gas: "86364",
+      gas: "110239",
     };
     try {
       const response = await stargateClient.signAndBroadcast(
@@ -69,12 +61,8 @@ const sendTokens = (
 };
 
 export default function Home() {
-  const {
-    getSigningStargateClient,
-    address,
-    status,
-    getRpcEndpoint,
-  } = useChain(chainName);
+  const { getSigningStargateClient, address, status, getRpcEndpoint } =
+    useChain(chainName);
 
   const [balance, setBalance] = useState(new BigNumber(0));
   const [isFetchingBalance, setFetchingBalance] = useState(false);
@@ -88,11 +76,6 @@ export default function Home() {
 
     let rpcEndpoint = await getRpcEndpoint();
 
-    if (!rpcEndpoint) {
-      console.info("no rpc endpoint — using a fallback");
-      rpcEndpoint = `https://rpc.cosmos.directory/${chainName}`;
-    }
-
     // get RPC client
     const client = await cosmos.ClientFactory.createRPCQueryClient({
       rpcEndpoint,
@@ -101,20 +84,19 @@ export default function Home() {
     // fetch balance
     const balance = await client.cosmos.bank.v1beta1.balance({
       address,
-      denom: chainassets?.assets[0].base as string,
+      denom: "uluna",
     });
-
-    // Get the display exponent
-    // we can get the exponent from chain registry asset denom_units
-    const exp = coin.denom_units.find((unit) => unit.denom === coin.display)
-      ?.exponent as number;
 
     // show balance in display values by exponentiating it
     const a = new BigNumber(balance.balance?.amount || 0);
-    const amount = a.multipliedBy(10 ** -exp);
+    const amount = a.multipliedBy(10 ** -6);
     setBalance(amount);
     setFetchingBalance(false);
   };
+
+  useEffect(() => {
+    getBalance();
+  }, [address]);
 
   return (
     <Container maxW="5xl" py={10}>

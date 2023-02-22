@@ -22,14 +22,8 @@ import { IoWalletOutline } from "react-icons/io5";
 
 import { ChainWalletCard } from "../components";
 
-// const chainNames_1 = ["cosmoshub"];
-// const chainNames_2: string[] = ["cosmoshub"];
-
-// const chainNames_1 = ["osmosis", "cosmoshub"];
-// const chainNames_2 = ["stargaze", "chihuahua"];
-
-const chainNames_1 = ["osmosis"];
-const chainNames_2 = ["cosmoshub"];
+const chainNames_1 = ["terra2", "terra2testnet"];
+const chainNames_2 = ["stargaze", "chihuahua"];
 
 export default () => {
   const { colorMode, setColorMode } = useColorMode();
