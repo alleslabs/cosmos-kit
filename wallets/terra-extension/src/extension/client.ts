@@ -1,8 +1,10 @@
 import { WalletClient, WalletAccount } from '@cosmos-kit/core';
 import { LCDClient } from '@terra-money/feather.js';
+import { decodePubkey } from '@cosmjs/proto-signing';
 import { BaseAccount as BaseAccount_pb } from '@terra-money/terra.proto/cosmos/auth/v1beta1/auth';
 import { TerraExtension } from './extension';
 import { OfflineSigner } from './signer';
+import { fromBase64 } from '@cosmjs/encoding';
 
 export class TerraClient implements WalletClient {
   readonly client: TerraExtension;
@@ -58,9 +60,7 @@ export class TerraClient implements WalletClient {
       name: 'Station Wallet',
       address: account.address,
       algo,
-      // remove prefix?
-      pubkey: accountInfo.pubKey?.value.slice(2) || Buffer.from(''),
-      // pubkey: decodePubkey(accountInfo.pubKey?.value) || Buffer.from(''),
+      pubkey: fromBase64(decodePubkey(accountInfo.pubKey).value),
     };
   }
 

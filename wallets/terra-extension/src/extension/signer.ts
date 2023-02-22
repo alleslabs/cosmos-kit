@@ -3,6 +3,7 @@ import {
   AccountData,
   Registry,
   DirectSignResponse,
+  decodePubkey,
 } from '@cosmjs/proto-signing';
 import { StdSignature } from '@cosmjs/amino';
 import { WalletAccount } from '@cosmos-kit/core';
@@ -43,7 +44,6 @@ export class OfflineSigner implements OfflineDirectSigner {
     _signerAddress: string,
     _signDoc: SignDoc
   ): Promise<DirectSignResponse> {
-    // get typeUrl from TxBody
     const typeUrls = TxBody.decode(_signDoc.bodyBytes).messages.map(
       ({ typeUrl }) => typeUrl
     );
@@ -83,15 +83,10 @@ export class OfflineSigner implements OfflineDirectSigner {
       memo: decodedTxBody.memo,
     });
 
-    console.log('signResponse', signResponse);
     const signatureBase64 = signResponse.payload.result.signatures[0];
-    console.log('signatureBase64', signatureBase64);
-
-    const pubkey = (signResponse.payload.result.auth_info.signer_infos[0]
-      .public_key as any).key;
 
     const signature: StdSignature = {
-      pub_key: pubkey,
+      pub_key: decodePubkey(authInfo.signerInfos[0].publicKey),
       signature: signatureBase64,
     };
 
