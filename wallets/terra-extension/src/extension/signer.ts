@@ -9,8 +9,9 @@ import { WalletAccount } from '@cosmos-kit/core';
 import { TerraExtension } from './extension';
 import { defaultRegistryTypes as defaultStargateTypes } from '@cosmjs/stargate';
 import { wasmTypes } from '@cosmjs/cosmwasm-stargate/build/modules/index';
-import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { TxBody, AuthInfo } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { camelToSnake, FakeMsg } from './utils';
+import { Fee } from '@terra-money/feather.js';
 
 export interface SignDoc {
   bodyBytes: Uint8Array;
@@ -42,8 +43,6 @@ export class OfflineSigner implements OfflineDirectSigner {
     _signerAddress: string,
     _signDoc: SignDoc
   ): Promise<DirectSignResponse> {
-    console.log('_signDoc', Buffer.from(_signDoc.bodyBytes).toString('base64'));
-
     // get typeUrl from TxBody
     const typeUrls = TxBody.decode(_signDoc.bodyBytes).messages.map(
       ({ typeUrl }) => typeUrl
@@ -61,14 +60,27 @@ export class OfflineSigner implements OfflineDirectSigner {
         })
     );
 
+    const authInfo = AuthInfo.decode(_signDoc.authInfoBytes);
+    const feeAmount =
+      authInfo.fee.amount[0].amount + authInfo.fee.amount[0].denom;
+    const fee = new Fee(
+      authInfo.fee.gasLimit.toNumber(),
+      feeAmount,
+      authInfo.fee.payer,
+      authInfo.fee.granter
+    );
+
+    console.log('_signDoc', _signDoc);
+    console.log('AuthInfo', authInfo);
+    console.log('decodedTxBody', decodedTxBody);
+
     const chainID = _signDoc.chainId;
 
     const signResponse = await this.client.sign({
       chainID,
       msgs: messages as any,
-      // fee: new Fee(1000000, '200000uluna'),
-      // memo: decodedTxBody.memo,
-      // gasAdjustment: 1.5,
+      fee,
+      memo: decodedTxBody.memo,
     });
 
     console.log('signResponse', signResponse);
