@@ -45,8 +45,6 @@ export class TerraClient implements WalletClient {
       await lcd.auth.accountInfo(account.address)
     ).toProto() as BaseAccount_pb;
 
-    console.log('accountInfo', accountInfo);
-
     let algo: 'secp256k1' | 'ed25519' | 'sr25519' = 'secp256k1';
     if (accountInfo?.pubKey?.typeUrl.match(/secp256k1/i)) {
       algo = 'secp256k1';
@@ -60,6 +58,7 @@ export class TerraClient implements WalletClient {
       name: 'Station Wallet',
       address: account.address,
       algo,
+      // Remark: pubkey is not available in the extension when user didn't send any tx before
       pubkey: fromBase64(decodePubkey(accountInfo.pubKey).value),
     };
   }

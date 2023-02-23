@@ -35,28 +35,6 @@ export const getTerraFromExtension: () => Promise<
     return void 0;
   }
 
-  // -----debugging code-----
-  const onMessage = (event) => {
-    const message = event?.data;
-    if (event.origin !== location.origin) return;
-    if (event.source !== window) return;
-    if (typeof message !== 'object') return;
-    if (message.target !== `station:inpage`) return;
-    if (!message.data) return;
-
-    if (message.data === 'ACK') {
-      // window.postMessage(
-      //   { target: `station:content`, data: 'ACK' },
-      //   location.origin
-      // );
-      console.log('Received!!!');
-      console.log('message', JSON.stringify(message));
-      console.log('---------------------------------');
-    }
-  };
-  window.addEventListener('message', onMessage);
-  // -----debugging code-----
-
   if (!(window as TerraWindow).isStationExtensionAvailable) {
     throw ClientNotExistError;
   }

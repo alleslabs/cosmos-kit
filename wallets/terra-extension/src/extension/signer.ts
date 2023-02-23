@@ -70,10 +70,6 @@ export class OfflineSigner implements OfflineDirectSigner {
       authInfo.fee.granter
     );
 
-    console.log('_signDoc', _signDoc);
-    console.log('AuthInfo', authInfo);
-    console.log('decodedTxBody', decodedTxBody);
-
     const chainID = _signDoc.chainId;
 
     const signResponse = await this.client.sign({
@@ -89,8 +85,6 @@ export class OfflineSigner implements OfflineDirectSigner {
       pub_key: decodePubkey(authInfo.signerInfos[0].publicKey),
       signature: signatureBase64,
     };
-
-    console.log(signature);
 
     return {
       signed: _signDoc,
