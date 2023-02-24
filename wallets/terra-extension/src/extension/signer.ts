@@ -3,14 +3,18 @@ import {
   AccountData,
   Registry,
   DirectSignResponse,
-  decodePubkey,
+  encodePubkey,
 } from '@cosmjs/proto-signing';
 import { StdSignature } from '@cosmjs/amino';
 import { WalletAccount } from '@cosmos-kit/core';
 import { TerraExtension } from './extension';
 import { defaultRegistryTypes as defaultStargateTypes } from '@cosmjs/stargate';
 import { wasmTypes } from '@cosmjs/cosmwasm-stargate/build/modules/index';
-import { TxBody, AuthInfo } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import {
+  TxBody,
+  AuthInfo,
+  SignerInfo,
+} from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { camelToSnake, FakeMsg } from './utils';
 import { Fee } from '@terra-money/feather.js';
 
@@ -81,14 +85,62 @@ export class OfflineSigner implements OfflineDirectSigner {
 
     const signatureBase64 = signResponse.payload.result.signatures[0];
 
+    const terraSignerInfo =
+      signResponse.payload.result.auth_info.signer_infos[0];
+
+    console.log('terra pubkey', terraSignerInfo);
+
+    const newPubkey = {
+      type: 'tendermint/PubKeySecp256k1',
+      value: terraSignerInfo.public_key['key'],
+    };
+
+    console.log('newPubkey', newPubkey);
+
+    const encodedNewPubkey = encodePubkey(newPubkey);
+
+    console.log('encodedNewPubkey', encodedNewPubkey);
+
+    const oldSignerInfo = authInfo.signerInfos[0];
+
+    console.log('oldSignerInfo', oldSignerInfo);
+
+    // replace pubkey
+    const newSignerInfo = SignerInfo.fromPartial({
+      publicKey: encodedNewPubkey,
+      modeInfo: oldSignerInfo.modeInfo,
+      sequence: oldSignerInfo.sequence,
+    });
+
+    console.log('newSignerInfo', newSignerInfo);
+
+    const newAuthInfo = AuthInfo.fromPartial({
+      signerInfos: [newSignerInfo],
+      fee: authInfo.fee,
+    });
+
+    console.log('newAuthInfo', newAuthInfo);
+
+    const newSignDoc = {
+      bodyBytes: _signDoc.bodyBytes,
+      authInfoBytes: AuthInfo.encode(newAuthInfo).finish(),
+      chainId: _signDoc.chainId,
+      accountNumber: _signDoc.accountNumber,
+    };
+
     const signature: StdSignature = {
-      pub_key: decodePubkey(authInfo.signerInfos[0].publicKey),
+      pub_key: (signResponse.payload.result.auth_info.signer_infos[0]
+        .public_key as any).key,
       signature: signatureBase64,
     };
 
-    return {
-      signed: _signDoc,
+    const send = {
+      signed: newSignDoc,
       signature,
     };
+
+    console.log('send', send);
+
+    return send;
   }
 }

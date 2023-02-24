@@ -41,25 +41,35 @@ export class TerraClient implements WalletClient {
       chainId === 'phoenix-1' ? 'mainnet' : 'testnet'
     );
 
-    const accountInfo = (
-      await lcd.auth.accountInfo(account.address)
-    ).toProto() as BaseAccount_pb;
-
+    // HACK: doesn't use when signing process
+    let pubkey = fromBase64('ApK7dnTXNvycFDkLcNbFy9fi1OMnfjHMLWP+pWoulwoh');
     let algo: 'secp256k1' | 'ed25519' | 'sr25519' = 'secp256k1';
-    if (accountInfo?.pubKey?.typeUrl.match(/secp256k1/i)) {
-      algo = 'secp256k1';
-    } else if (accountInfo?.pubKey?.typeUrl.match(/ed25519/i)) {
-      algo = 'ed25519';
-    } else if (accountInfo?.pubKey?.typeUrl.match(/sr25519/i)) {
-      algo = 'sr25519';
+
+    try {
+      const accountInfo = (
+        await lcd.auth.accountInfo(account.address)
+      ).toProto() as BaseAccount_pb;
+
+      if (accountInfo?.pubKey?.typeUrl.match(/secp256k1/i)) {
+        algo = 'secp256k1';
+      } else if (accountInfo?.pubKey?.typeUrl.match(/ed25519/i)) {
+        algo = 'ed25519';
+      } else if (accountInfo?.pubKey?.typeUrl.match(/sr25519/i)) {
+        algo = 'sr25519';
+      }
+
+      if (accountInfo.pubKey) {
+        pubkey = fromBase64(decodePubkey(accountInfo.pubKey).value);
+      }
+    } catch (err) {
+      console.log(err);
     }
 
     return {
       name: 'Station Wallet',
       address: account.address,
       algo,
-      // Remark: pubkey is not available in the extension when user didn't send any tx before
-      pubkey: fromBase64(decodePubkey(accountInfo.pubKey).value),
+      pubkey,
     };
   }
 
