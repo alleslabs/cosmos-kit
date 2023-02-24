@@ -99,9 +99,8 @@ export class OfflineSigner implements OfflineDirectSigner {
 
     // replace pubkey
     const newSignerInfo = SignerInfo.fromPartial({
+      ...oldSignerInfo,
       publicKey: encodedNewPubkey,
-      modeInfo: oldSignerInfo.modeInfo,
-      sequence: oldSignerInfo.sequence,
     });
 
     const newAuthInfo = AuthInfo.fromPartial({
@@ -110,10 +109,8 @@ export class OfflineSigner implements OfflineDirectSigner {
     });
 
     const newSignDoc = {
-      bodyBytes: _signDoc.bodyBytes,
+      ..._signDoc,
       authInfoBytes: AuthInfo.encode(newAuthInfo).finish(),
-      chainId: _signDoc.chainId,
-      accountNumber: _signDoc.accountNumber,
     };
 
     const signature: StdSignature = {
