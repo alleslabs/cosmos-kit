@@ -88,22 +88,14 @@ export class OfflineSigner implements OfflineDirectSigner {
     const terraSignerInfo =
       signResponse.payload.result.auth_info.signer_infos[0];
 
-    console.log('terra pubkey', terraSignerInfo);
-
     const newPubkey = {
       type: 'tendermint/PubKeySecp256k1',
       value: terraSignerInfo.public_key['key'],
     };
 
-    console.log('newPubkey', newPubkey);
-
     const encodedNewPubkey = encodePubkey(newPubkey);
 
-    console.log('encodedNewPubkey', encodedNewPubkey);
-
     const oldSignerInfo = authInfo.signerInfos[0];
-
-    console.log('oldSignerInfo', oldSignerInfo);
 
     // replace pubkey
     const newSignerInfo = SignerInfo.fromPartial({
@@ -112,14 +104,10 @@ export class OfflineSigner implements OfflineDirectSigner {
       sequence: oldSignerInfo.sequence,
     });
 
-    console.log('newSignerInfo', newSignerInfo);
-
     const newAuthInfo = AuthInfo.fromPartial({
       signerInfos: [newSignerInfo],
       fee: authInfo.fee,
     });
-
-    console.log('newAuthInfo', newAuthInfo);
 
     const newSignDoc = {
       bodyBytes: _signDoc.bodyBytes,
@@ -134,13 +122,9 @@ export class OfflineSigner implements OfflineDirectSigner {
       signature: signatureBase64,
     };
 
-    const send = {
+    return {
       signed: newSignDoc,
       signature,
     };
-
-    console.log('send', send);
-
-    return send;
   }
 }
