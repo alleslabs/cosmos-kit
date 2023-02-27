@@ -3,6 +3,7 @@ import { Asset, AssetList } from "@chain-registry/types";
 import { Center, Container } from "@chakra-ui/react";
 import { StdFee } from "@cosmjs/amino";
 import { SigningStargateClient } from "@cosmjs/stargate";
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { useChain } from "@cosmos-kit/react";
 import BigNumber from "bignumber.js";
 import { assets } from "chain-registry";
@@ -15,6 +16,7 @@ const chainName = "terra2testnet";
 
 const sendTokens = (
   getSigningStargateClient: () => Promise<SigningStargateClient>,
+  getSigningCosmWasmClient: () => Promise<SigningCosmWasmClient>,
   setResp: (resp: string) => any,
   address: string
 ) => {
@@ -25,34 +27,78 @@ const sendTokens = (
       return;
     }
 
-    const { send } = cosmos.bank.v1beta1.MessageComposer.withTypeUrl;
+    const cosmClient = await getSigningCosmWasmClient();
+    if (!cosmClient || !address) {
+      console.error("cosmClient undefined or address undefined.");
+      return;
+    }
 
-    const msg = send({
-      amount: [
-        {
-          denom: "uluna",
-          amount: "1000",
-        },
-      ],
-      toAddress: address,
-      fromAddress: address,
-    });
+    // const { send } = cosmos.bank.v1beta1.MessageComposer.withTypeUrl;
+
+    // const msg = send({
+    //   amount: [
+    //     {
+    //       denom: "uluna",
+    //       amount: "1000",
+    //     },
+    //   ],
+    //   toAddress: address,
+    //   fromAddress: address,
+    // });
+
+    // const fee: StdFee = {
+    //   amount: [
+    //     {
+    //       denom: "uluna",
+    //       amount: "16536",
+    //     },
+    //   ],
+    //   gas: "110239",
+    // };
 
     const fee: StdFee = {
       amount: [
         {
           denom: "uluna",
-          amount: "16536",
+          amount: "60980",
         },
       ],
-      gas: "110239",
+      gas: "406453",
     };
+
+    // const msg = {
+    //   app: {},
+    //   base: {
+    //     ans_host_address:
+    //       "terra1dnmk4qdcv9h52wjus0wgx5uc8ewtntc2q0vt4n2dlxty8j2xhyrsmynhtg",
+    //     version_control_address:
+    //       "terra1d7ud0c3prk5j7mhpndnkvxe4xmltj2gvgxrz2l0a49ehvneu7e3s5nsakt",
+    //   },
+    // };
+
     try {
-      const response = await stargateClient.signAndBroadcast(
+      // const response = await cosmClient.instantiate(
+      //   address,
+      //   6752,
+      //   msg,
+      //   "test",
+      //   fee
+      // );
+
+      const response = await cosmClient.execute(
         address,
-        [msg],
+        "terra13c0t7k49ea6rvccfkzfkhrcklcrp283wfjsjqrnm8trepgzuwtsqp2mllj",
+        {
+          migrate: {},
+        },
         fee
       );
+
+      // const response = await stargateClient.signAndBroadcast(
+      //   address,
+      //   [msg],
+      //   fee
+      // );
       setResp(JSON.stringify(response, null, 2));
     } catch (error) {
       console.error(error);
@@ -61,8 +107,13 @@ const sendTokens = (
 };
 
 export default function Home() {
-  const { getSigningStargateClient, address, status, getRpcEndpoint } =
-    useChain(chainName);
+  const {
+    getSigningStargateClient,
+    getSigningCosmWasmClient,
+    address,
+    status,
+    getRpcEndpoint,
+  } = useChain(chainName);
 
   const [balance, setBalance] = useState(new BigNumber(0));
   const [isFetchingBalance, setFetchingBalance] = useState(false);
@@ -111,6 +162,7 @@ export default function Home() {
           sendTokensButtonText="Send Tokens"
           handleClickSendTokens={sendTokens(
             getSigningStargateClient as () => Promise<SigningStargateClient>,
+            getSigningCosmWasmClient as () => Promise<SigningCosmWasmClient>,
             setResp as () => any,
             address as string
           )}

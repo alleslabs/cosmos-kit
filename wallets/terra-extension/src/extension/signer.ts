@@ -1,22 +1,18 @@
 import {
   OfflineDirectSigner,
   AccountData,
-  Registry,
   DirectSignResponse,
   encodePubkey,
 } from '@cosmjs/proto-signing';
 import { StdSignature } from '@cosmjs/amino';
 import { WalletAccount } from '@cosmos-kit/core';
 import { TerraExtension } from './extension';
-import { defaultRegistryTypes as defaultStargateTypes } from '@cosmjs/stargate';
-import { wasmTypes } from '@cosmjs/cosmwasm-stargate/build/modules/index';
 import {
   TxBody,
   AuthInfo,
   SignerInfo,
 } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { camelToSnake, FakeMsg } from './utils';
-import { Fee } from '@terra-money/feather.js';
+import { Fee as TerraFee, Msg as TerraMsg } from '@terra-money/feather.js';
 
 export interface SignDoc {
   bodyBytes: Uint8Array;
@@ -48,26 +44,13 @@ export class OfflineSigner implements OfflineDirectSigner {
     _signerAddress: string,
     _signDoc: SignDoc
   ): Promise<DirectSignResponse> {
-    const typeUrls = TxBody.decode(_signDoc.bodyBytes).messages.map(
-      ({ typeUrl }) => typeUrl
-    );
-
-    const registry = new Registry([...defaultStargateTypes, ...wasmTypes]);
-
-    const decodedTxBody = registry.decodeTxBody(_signDoc.bodyBytes);
-    const messages = decodedTxBody.messages.map(
-      (msg, i) =>
-        new FakeMsg({
-          '@type': typeUrls[i],
-          // hack: convert camelCase to snake_case
-          ...(camelToSnake(msg as any) as object),
-        })
-    );
+    const txbody = TxBody.decode(_signDoc.bodyBytes);
 
     const authInfo = AuthInfo.decode(_signDoc.authInfoBytes);
+
     const feeAmount =
       authInfo.fee.amount[0].amount + authInfo.fee.amount[0].denom;
-    const fee = new Fee(
+    const fee = new TerraFee(
       authInfo.fee.gasLimit.toNumber(),
       feeAmount,
       authInfo.fee.payer,
@@ -78,9 +61,9 @@ export class OfflineSigner implements OfflineDirectSigner {
 
     const signResponse = await this.client.sign({
       chainID,
-      msgs: messages as any,
+      msgs: txbody.messages.map((msg) => TerraMsg.fromProto(msg)),
       fee,
-      memo: decodedTxBody.memo,
+      memo: txbody.memo,
     });
 
     const signatureBase64 = signResponse.payload.result.signatures[0];

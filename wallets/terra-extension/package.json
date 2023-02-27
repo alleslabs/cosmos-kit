@@ -92,7 +92,7 @@
     "@babel/runtime": "7.11.2",
     "@chain-registry/types": "0.13.1",
     "@cosmos-kit/core": "^1.0.4",
-    "@terra-money/feather.js": "^1.0.0-beta.11",
+    "@terra-money/feather.js": "^1.0.0-beta.12",
     "@terra-money/wallet-types": "^3.11.2",
     "react-icons": "4.4.0",
     "snake-case": "^3.0.4"
