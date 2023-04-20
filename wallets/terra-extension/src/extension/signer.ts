@@ -19,7 +19,7 @@ import {
 import {
   Fee as TerraFee,
   Msg as TerraMsg,
-  SignMode,
+  SignatureV2,
 } from '@terra-money/feather.js';
 
 export interface SignDoc {
@@ -52,21 +52,13 @@ export class OfflineSigner implements OfflineAminoSigner {
     signerAddress: string,
     signDoc: StdSignDoc
   ): Promise<AminoSignResponse> {
-    console.log('signAmino', signerAddress, signDoc);
     const signDocFee = signDoc.fee;
     const feeAmount = signDocFee.amount[0].amount + signDocFee.amount[0].denom;
-
-    const fakeMsgs = signDoc.msgs.map((msg) =>
-      TerraMsg.fromAmino(msg as TerraMsg.Amino)
-    );
+    const fakeMsgs = signDoc.msgs.map((msg) => TerraMsg.fromAmino(msg as TerraMsg.Amino));
 
     const signResponse = await this.extension.sign({
       chainID: signDoc.chain_id,
-      msgs: fakeMsgs as any,
-      // remark
-      // Not sure how to request signMode to station wallet
-      // station keep using SIGN_MODE_DIRECT
-      signMode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+      msgs: fakeMsgs,
       fee: new TerraFee(
         parseInt(signDocFee.gas),
         feeAmount,
@@ -74,17 +66,14 @@ export class OfflineSigner implements OfflineAminoSigner {
         signDocFee.granter
       ),
       memo: signDoc.memo,
+      signMode: SignatureV2.SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
     } as any);
-
-    console.log('signResponse xx', signResponse);
 
     const signature: StdSignature = {
       pub_key: (signResponse.payload.result.auth_info.signer_infos[0]
         .public_key as any).key,
       signature: signResponse.payload.result.signatures[0],
     };
-
-    console.log('signature', signature);
 
     return {
       signed: signDoc,
