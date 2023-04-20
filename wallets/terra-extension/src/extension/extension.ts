@@ -1,7 +1,7 @@
 import { Extension, Tx, ExtensionOptions } from '@terra-money/feather.js';
 import { NetworkInfo } from './types';
 
-type ConnectResponse = { address?: string };
+type ConnectResponse = { address: string; pubkey: Record<number, string> };
 type InfoResponse = Record<string, NetworkInfo>;
 type SignResponse = {
   payload: {

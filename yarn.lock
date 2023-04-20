@@ -5341,10 +5341,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@terra-money/feather.js@^1.0.0-beta.12":
-  version "1.0.0-beta.12"
-  resolved "https://registry.yarnpkg.com/@terra-money/feather.js/-/feather.js-1.0.0-beta.12.tgz#285af7b0fc37551df1d8c15ceae69d87c1bbe23b"
-  integrity sha512-O1Q9pZ9nK/ZbXWtt7xvX2OoyiUCgUeAzHMNiSzzfyCYupRFWDqwuSf3MASyW+KjjST6yhbv4hyM1mThApdgcoA==
+"@terra-money/feather.js@^1.0.0-beta.14":
+  version "1.0.0-beta.15"
+  resolved "https://registry.yarnpkg.com/@terra-money/feather.js/-/feather.js-1.0.0-beta.15.tgz#d81e31f28428cb23a27bf067eaa7e8f399e9c511"
+  integrity sha512-KKmwmLemorifApC7y7Rn8H8MzdPmHnTkpqncfHdvWLzhGxeRw0hv24ZPkOj+SOZbhdutwp2RtAH1IEZz23cHUQ==
   dependencies:
     "@terra-money/legacy.proto" "npm:@terra-money/terra.proto@^0.1.7"
     "@terra-money/terra.proto" "^2.2.0-beta.4"
