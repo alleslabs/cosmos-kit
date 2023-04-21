@@ -1,6 +1,7 @@
 import { Wallet } from '@cosmos-kit/core';
 import { GoDesktopDownload } from 'react-icons/go';
 import { RiChromeFill } from 'react-icons/ri';
+import { GrFirefox } from 'react-icons/gr';
 
 export const terraExtensionInfo: Wallet = {
   name: 'terra-extension',
@@ -16,11 +17,20 @@ export const terraExtensionInfo: Wallet = {
       device: 'desktop',
       browser: 'chrome',
       icon: RiChromeFill,
-      link: 'https://chrome.google.com/webstore/detail/station-wallet/aiifbnbfobpmeekipheeijimdpnlpgpp',
+      link:
+        'https://chrome.google.com/webstore/detail/station-wallet/aiifbnbfobpmeekipheeijimdpnlpgpp',
+    },
+    {
+      device: 'desktop',
+      browser: 'firefox',
+      icon: GrFirefox,
+      link:
+        'https://addons.mozilla.org/en-US/firefox/addon/terra-station-wallet/',
     },
     {
       icon: GoDesktopDownload,
-      link: 'https://chrome.google.com/webstore/detail/station-wallet/aiifbnbfobpmeekipheeijimdpnlpgpp',
+      link:
+        'https://docs.terra.money/learn/station/download/station-desktop.html#install-station',
     },
   ],
 };
